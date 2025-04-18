@@ -1,17 +1,47 @@
 import { useState, useEffect } from "react";
-import {
+import client, {
   databases,
   DATABASE_ID,
   COLLECTION_ID_MESSAGES,
 } from "../appwriteConfig";
-import { ID , Query} from "appwrite";
-import {Trash} from 'react-feather';
+import { ID, Query } from "appwrite";
+import { Trash } from "react-feather";
 
 export default function Room() {
   const [messages, setMessages] = useState([]);
   const [messageBody, setMessageBody] = useState("");
   useEffect(() => {
     getMessages();
+    const unsubscribe = client.subscribe(
+      `databases.${DATABASE_ID}.collections.${COLLECTION_ID_MESSAGES}.documents`,
+      (response) => {
+        //console log depending on the action
+        if (
+          response.events.includes(
+            "databases.*.collections.*.documents.*.create"
+          )
+        ) {
+          console.log("A message was created");
+          setMessages((prevMessages) => [response.payload, ...prevMessages]); //here we spread (copy the whole messages arr) out the previous array
+        }
+
+        if (
+            response.events.includes(
+              "databases.*.collections.*.documents.*.delete"
+            )
+          ) {
+            console.log("A message was deleted");
+             //filters the massages which id is not equal to the deleted message id
+            setMessages((prevMessages) =>
+                prevMessages.filter((message) => message.$id !== response.payload.$id)
+              );
+          }
+      }
+    );
+
+    return ()=>{
+        unsubscribe();
+    }
   }, []);
 
   const handleSubmit = async (e) => {
@@ -26,7 +56,7 @@ export default function Room() {
       payload
     );
     console.log("Created", response);
-    setMessages(prevState=>[response, ...messages]) //here we spread (copy the whole messages arr) out the previous array
+    
     setMessageBody(""); //we want to reset the form
   };
   const getMessages = async () => {
@@ -34,19 +64,19 @@ export default function Room() {
       DATABASE_ID,
       COLLECTION_ID_MESSAGES,
       [
-        Query.orderDesc('$createdAt'), //orders the text messages - newest first
-        Query.limit(20) //sets the limit of messages you will see
+        Query.orderDesc("$createdAt"), //orders the text messages - newest first
+        Query.limit(20), //sets the limit of messages you will see
       ]
     );
     console.log("RESPONSE:", response);
     setMessages(response.documents);
   };
 
-  const deleteMessage = async(message_id)=>{
-    databases.deleteDocument(DATABASE_ID, COLLECTION_ID_MESSAGES, message_id)
-    setMessages(prevState => messages.filter(message => message.$id !== message_id)) //filters the massages which id is not equal to the deleted message id
-    console.log('Deleted')
-  }
+  const deleteMessage = async (message_id) => {
+    databases.deleteDocument(DATABASE_ID, COLLECTION_ID_MESSAGES, message_id);
+   
+    console.log("Deleted");
+  };
   return (
     <main>
       <div>
@@ -71,8 +101,11 @@ export default function Room() {
             <div key={message.$id}>
               <div>
                 <p>{new Date(message.$createdAt).toLocaleString()}</p>
-                <Trash onClick={()=>{deleteMessage(message.$id)}}/>
-                
+                <Trash
+                  onClick={() => {
+                    deleteMessage(message.$id);
+                  }}
+                />
               </div>
               <div>
                 <span>{message.body}</span>
