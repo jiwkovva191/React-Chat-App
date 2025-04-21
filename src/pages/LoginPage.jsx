@@ -24,7 +24,7 @@ export default function Login() {
   return (
     <div>
       <div>
-        <form>
+        <form onSubmit={(e)=>{handleUserLogin(e,credentials)}}>
           <div>
             <label htmlFor="">Email:</label>
             <input
