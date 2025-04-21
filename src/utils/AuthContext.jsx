@@ -51,7 +51,7 @@ console.error(error);
       const response = await account.createEmailPasswordSession(credentials.email, credentials.password);
       console.log('LOGGED IN:', response);
       
-      const accountDetails = account.get();
+      const accountDetails = await account.get();
       setUser(accountDetails);
       navigate('/');
 
@@ -60,8 +60,12 @@ console.error(error);
     }
   };
 
-  
-  const contextData = { user,handleUserLogin };
+  const handleUserLogout = async ()=>{
+    account.deleteSession('current');
+    setUser(null);
+  }
+
+  const contextData = { user,handleUserLogin, handleUserLogout };
   return (
     <AuthContext.Provider value={contextData}>
       {loading ? <p>Loading...</p> : children}
