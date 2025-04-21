@@ -4,11 +4,13 @@ import client, {
   DATABASE_ID,
   COLLECTION_ID_MESSAGES,
 } from "../appwriteConfig";
-import { ID, Query } from "appwrite";
+import { ID, Query, Role, Permission } from "appwrite";
 import { Trash } from "react-feather";
 import Header from "../components/Header";
+import { useAuth } from "../utils/AuthContext";
 
 export default function Room() {
+  const { user } = useAuth();
   const [messages, setMessages] = useState([]);
   const [messageBody, setMessageBody] = useState("");
   useEffect(() => {
@@ -50,15 +52,23 @@ export default function Room() {
   const handleSubmit = async (e) => {
     e.preventDefault(); //prevents default form(e) action /refreshing the form/
     let payload = {
+      user_id: user.$id,
+      username: user.name,
       body: messageBody,
     };
+
+    let permissions = [
+      Permission.write(Role.user(user.$id)),
+      Permission.delete(Role.user(user.$id)), //allow user to delete their own messages
+    ];
     let response = await databases.createDocument(
       DATABASE_ID,
       COLLECTION_ID_MESSAGES,
       ID.unique(),
-      payload
+      payload,
+      permissions
     );
-    console.log("Created", response);
+    console.log("Created", response.$permissions);
 
     setMessageBody(""); //we want to reset the form
   };
@@ -76,9 +86,14 @@ export default function Room() {
   };
 
   const deleteMessage = async (message_id) => {
-    databases.deleteDocument(DATABASE_ID, COLLECTION_ID_MESSAGES, message_id);
+    try{
+      await databases.deleteDocument(DATABASE_ID, COLLECTION_ID_MESSAGES, message_id);
 
-    console.log("Deleted");
+      console.log("Deleted");
+    }catch(err){
+      console.error("Failed to delete the message", err);
+    }
+    
   };
   return (
     <main>
@@ -101,22 +116,39 @@ export default function Room() {
           </div>
         </form>
         <div>
-          {messages.map((message) => (
-            <div key={message.$id}>
-              <div>
-                <p>{new Date(message.$createdAt).toLocaleString()}</p>
-                <Trash
-                  onClick={() => {
-                    deleteMessage(message.$id);
-                  }}
-                />
-              </div>
-              <div>
-                <span>{message.body}</span>
-              </div>
-            </div>
-          ))}
+        {messages.map((message) => {
+  console.log("Message permissions:", message.$permissions);
+  return (
+    <div key={message.$id}>
+      <div>
+        <p>
+          {message?.username ? (
+            <span>{message.username}</span>
+          ) : (
+            <span>Anonymous user</span>
+          )}
+          <small>{new Date(message.$createdAt).toLocaleString()}</small>
+        </p>
+
+        {message.$permissions.includes(`delete("user:${user.$id}")`) && (
+          <Trash
+            onClick={() => {
+              deleteMessage(message.$id);
+            }}
+          />
+        )}
+      </div>
+      <div>
+        <span>{message.body}</span>
+      </div>
+    </div>
+  );
+})}
         </div>
+
+
+
+
       </div>
     </main>
   );
