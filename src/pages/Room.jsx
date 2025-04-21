@@ -6,6 +6,7 @@ import client, {
 } from "../appwriteConfig";
 import { ID, Query } from "appwrite";
 import { Trash } from "react-feather";
+import Header from "../components/Header";
 
 export default function Room() {
   const [messages, setMessages] = useState([]);
@@ -26,22 +27,24 @@ export default function Room() {
         }
 
         if (
-            response.events.includes(
-              "databases.*.collections.*.documents.*.delete"
+          response.events.includes(
+            "databases.*.collections.*.documents.*.delete"
+          )
+        ) {
+          console.log("A message was deleted");
+          //filters the massages which id is not equal to the deleted message id
+          setMessages((prevMessages) =>
+            prevMessages.filter(
+              (message) => message.$id !== response.payload.$id
             )
-          ) {
-            console.log("A message was deleted");
-             //filters the massages which id is not equal to the deleted message id
-            setMessages((prevMessages) =>
-                prevMessages.filter((message) => message.$id !== response.payload.$id)
-              );
-          }
+          );
+        }
       }
     );
 
-    return ()=>{
-        unsubscribe();
-    }
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const handleSubmit = async (e) => {
@@ -56,7 +59,7 @@ export default function Room() {
       payload
     );
     console.log("Created", response);
-    
+
     setMessageBody(""); //we want to reset the form
   };
   const getMessages = async () => {
@@ -74,11 +77,12 @@ export default function Room() {
 
   const deleteMessage = async (message_id) => {
     databases.deleteDocument(DATABASE_ID, COLLECTION_ID_MESSAGES, message_id);
-   
+
     console.log("Deleted");
   };
   return (
     <main>
+      <Header />
       <div>
         <form onSubmit={handleSubmit} action="">
           <div>
