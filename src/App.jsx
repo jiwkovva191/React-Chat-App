@@ -1,5 +1,6 @@
 import Room from "./pages/Room";
 import Login from "./pages/LoginPage";
+import Register from "./pages/RegisterPage";
 import PrivateRoutes from "./components/PrivateRoutes";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
@@ -11,6 +12,7 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route element={<PrivateRoutes />}>
             <Route path="/" element={<Room />} />{" "}
             {/*when the user is not authenticated, they are being redirected to login page */}

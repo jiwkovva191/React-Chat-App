@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../utils/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+
 
 export default function Login() {
   const { user, handleUserLogin } = useAuth();
@@ -42,7 +43,7 @@ export default function Login() {
               type="password"
               required
               name="password"
-              placeholder="Enter your passwordl"
+              placeholder="Enter your password"
               value={credentials.password}
               onChange={handleInputChange}
             />
@@ -51,6 +52,7 @@ export default function Login() {
             <input type="submit" value="Login" />
           </div>
         </form>
+        <p>Don't have an account? Register <Link to ="/register">here</Link></p>
       </div>
     </div>
   );
