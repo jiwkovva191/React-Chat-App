@@ -118,7 +118,7 @@ export default function Room() {
             </div>
             <div>
               <input
-                className="bg-[#10B981] px-[10px] py-[5px] rounded-md font-bold text-white"
+                className="bg-[#10B981] px-[10px] py-[5px] rounded-md font-bold text-white cursor-pointer" 
                 type="submit"
                 value="Send"
               />
@@ -148,7 +148,7 @@ export default function Room() {
                         onClick={() => {
                           deleteMessage(message.$id);
                         }}
-                        className="text-white"
+                        className="text-white cursor-pointer"
                       />
                     )}
                   </div>
