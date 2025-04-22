@@ -127,9 +127,11 @@ export default function Room() {
           <div className="flex flex-col gap-[30px] h-[400px] overflow-y-auto">
             {messages.map((message) => {
               console.log("Message permissions:", message.$permissions);
+              //check if the message belongs to the current user
+              const isCurrentUser = message.user_id === user.$id
               return (
-                <div key={message.$id} className="flex flex-col gap-[10px]">
-                  <div className="flex flex-row">
+                <div key={message.$id} className={`flex flex-col gap-[10px] ${isCurrentUser ? "items-end":"items-start"}`}>
+                  <div className={`flex flex-row ${isCurrentUser ? "justify-end":"justify-start"}`}>
                     <p className="flex flex-col text-white text-[15px] font-light">
                       {message?.username ? (
                         <span>{message.username}</span>
@@ -153,7 +155,9 @@ export default function Room() {
                     )}
                   </div>
                   <div>
-                    <span className="bg-[#6EE7B7] py-[5px] px-[12px] rounded-xl text-[18px]">
+                    <span className={` py-[5px] px-[12px] rounded-xl text-[18px] ${
+                      isCurrentUser ? "bg-[#FCA5A5]":"bg-[#6EE7B7]"
+                    }`}>
                       {message.body}
                     </span>
                   </div>
