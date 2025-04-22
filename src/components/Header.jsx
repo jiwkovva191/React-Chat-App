@@ -7,7 +7,7 @@ export default function Header() {
       {user ? (
         <>
           Welcome, {user.name}
-          <LogOut onClick={handleUserLogout} />
+          <LogOut onClick={handleUserLogout} className="cursor-pointer" />
         </>
       ) : (
         <button>Login</button>
