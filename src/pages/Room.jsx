@@ -86,70 +86,83 @@ export default function Room() {
   };
 
   const deleteMessage = async (message_id) => {
-    try{
-      await databases.deleteDocument(DATABASE_ID, COLLECTION_ID_MESSAGES, message_id);
+    try {
+      await databases.deleteDocument(
+        DATABASE_ID,
+        COLLECTION_ID_MESSAGES,
+        message_id
+      );
 
       console.log("Deleted");
-    }catch(err){
+    } catch (err) {
       console.error("Failed to delete the message", err);
     }
-    
   };
   return (
-    <main>
-      <Header />
-      <div>
-        <form onSubmit={handleSubmit} action="">
-          <div>
-            <textarea
-              required
-              maxLength={2000}
-              placeholder="Say something... "
-              onChange={(e) => {
-                setMessageBody(e.target.value);
-              }}
-              value={messageBody}
-            ></textarea>
-          </div>
-          <div>
-            <input type="submit" value="Send" />
-          </div>
-        </form>
-        <div>
-        {messages.map((message) => {
-  console.log("Message permissions:", message.$permissions);
-  return (
-    <div key={message.$id}>
-      <div>
-        <p>
-          {message?.username ? (
-            <span>{message.username}</span>
-          ) : (
-            <span>Anonymous user</span>
-          )}
-          <small>{new Date(message.$createdAt).toLocaleString()}</small>
-        </p>
+    <div className="min-h-screen flex items-center justify-center bg-[#2e2e2ed6]">
+      <div className=" bg-[#2E2E2E] p-[30px] my-[20px] rounded-2xl">
+        <Header />
+        <div className="flex flex-col gap-[20px]">
+          <form onSubmit={handleSubmit} action="">
+            <div>
+              <textarea
+                required
+                maxLength={2000}
+                placeholder="Say something... "
+                onChange={(e) => {
+                  setMessageBody(e.target.value);
+                }}
+                value={messageBody}
+                className="bg-white rounded-2xl p-[10px] w-[400px]"
+              ></textarea>
+            </div>
+            <div>
+              <input
+                className="bg-[#10B981] px-[10px] py-[5px] rounded-md font-bold text-white"
+                type="submit"
+                value="Send"
+              />
+            </div>
+          </form>
+          <div className="flex flex-col gap-[30px] h-[400px] overflow-y-auto">
+            {messages.map((message) => {
+              console.log("Message permissions:", message.$permissions);
+              return (
+                <div key={message.$id} className="flex flex-col gap-[10px]">
+                  <div className="flex flex-row">
+                    <p className="flex flex-col text-white text-[15px] font-light">
+                      {message?.username ? (
+                        <span>{message.username}</span>
+                      ) : (
+                        <span>Anonymous user</span>
+                      )}
+                      <small>
+                        {new Date(message.$createdAt).toLocaleString()}
+                      </small>
+                    </p>
 
-        {message.$permissions.includes(`delete("user:${user.$id}")`) && (
-          <Trash
-            onClick={() => {
-              deleteMessage(message.$id);
-            }}
-          />
-        )}
-      </div>
-      <div>
-        <span>{message.body}</span>
+                    {message.$permissions.includes(
+                      `delete("user:${user.$id}")`
+                    ) && (
+                      <Trash
+                        onClick={() => {
+                          deleteMessage(message.$id);
+                        }}
+                        className="text-white"
+                      />
+                    )}
+                  </div>
+                  <div>
+                    <span className="bg-[#6EE7B7] py-[5px] px-[12px] rounded-xl text-[18px]">
+                      {message.body}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
-  );
-})}
-        </div>
-
-
-
-
-      </div>
-    </main>
   );
 }

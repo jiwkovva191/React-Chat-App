@@ -3,7 +3,7 @@ import { useAuth } from "../utils/AuthContext";
 export default function Header() {
     const {user, handleUserLogout} = useAuth();
   return (
-    <div>
+    <div className="flex flex-row gap-[50px] text-white text-[25px] font-semibold">
       {user ? (
         <>
           Welcome, {user.name}
